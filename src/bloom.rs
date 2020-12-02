@@ -53,7 +53,7 @@ use super::hashing::HashIter;
 /// ```
 pub struct BloomFilter<R = RandomState, S = RandomState> {
     bits: BitVec,
-    num_hashes: u32,
+    num_hashes: usize,
     hash_builder_one: R,
     hash_builder_two: S,
 }
@@ -62,7 +62,7 @@ pub struct BloomFilter<R = RandomState, S = RandomState> {
 impl BloomFilter<RandomState, RandomState> {
     /// Create a new BloomFilter with the specified number of bits,
     /// and hashes
-    pub fn with_size(num_bits: usize, num_hashes: u32) -> BloomFilter<RandomState, RandomState> {
+    pub fn with_size(num_bits: usize, num_hashes: usize) -> BloomFilter<RandomState, RandomState> {
         BloomFilter {
             bits: BitVec::from_elem(num_bits,false),
             num_hashes: num_hashes,
@@ -74,7 +74,7 @@ impl BloomFilter<RandomState, RandomState> {
     /// create a BloomFilter that expects to hold
     /// `expected_num_items`.  The filter will be sized to have a
     /// false positive rate of the value specified in `rate`.
-    pub fn with_rate(rate: f32, expected_num_items: u32) -> BloomFilter<RandomState, RandomState> {
+    pub fn with_rate(rate: f32, expected_num_items: usize) -> BloomFilter<RandomState, RandomState> {
         let bits = needed_bits(rate,expected_num_items);
         BloomFilter::with_size(bits,optimal_num_hashes(bits,expected_num_items))
     }
@@ -90,7 +90,7 @@ impl<R,S> BloomFilter<R,S>
     /// two HashBuilders that produce the same or correlated hash
     /// values will break the false positive guarantees of the
     /// BloomFilter.
-    pub fn with_size_and_hashers(num_bits: usize, num_hashes: u32,
+    pub fn with_size_and_hashers(num_bits: usize, num_hashes: usize,
                                  hash_builder_one: R, hash_builder_two: S) -> BloomFilter<R,S> {
         BloomFilter {
             bits: BitVec::from_elem(num_bits,false),
@@ -109,7 +109,7 @@ impl<R,S> BloomFilter<R,S>
     /// two HashBuilders that produce the same or correlated hash
     /// values will break the false positive guarantees of the
     /// BloomFilter.
-    pub fn with_rate_and_hashers(rate: f32, expected_num_items: u32,
+    pub fn with_rate_and_hashers(rate: f32, expected_num_items: usize,
                                  hash_builder_one: R, hash_builder_two: S) -> BloomFilter<R, S> {
         let bits = needed_bits(rate,expected_num_items);
         BloomFilter::with_size_and_hashers(bits,optimal_num_hashes(bits,expected_num_items),
@@ -122,7 +122,7 @@ impl<R,S> BloomFilter<R,S>
     }
 
     /// Get the number of hash functions this BloomFilter is using
-    pub fn num_hashes(&self) -> u32 {
+    pub fn num_hashes(&self) -> usize {
         self.num_hashes
     }
 }
@@ -212,10 +212,10 @@ impl Unionable for BloomFilter {
 
 /// Return the optimal number of hashes to use for the given number of
 /// bits and items in a filter
-pub fn optimal_num_hashes(num_bits: usize, num_items: u32) -> u32 {
+pub fn optimal_num_hashes(num_bits: usize, num_items: usize) -> usize {
     min(
         max(
-            (num_bits as f32 / num_items as f32 * core::f32::consts::LN_2).round() as u32,
+            (num_bits as f32 / num_items as f32 * core::f32::consts::LN_2).round() as usize,
              2
            ),
         200
@@ -224,7 +224,7 @@ pub fn optimal_num_hashes(num_bits: usize, num_items: u32) -> u32 {
 
 /// Return the number of bits needed to satisfy the specified false
 /// positive rate, if the filter will hold `num_items` items.
-pub fn needed_bits(false_pos_rate:f32, num_items: u32) -> usize {
+pub fn needed_bits(false_pos_rate:f32, num_items: usize) -> usize {
     let ln22 = core::f32::consts::LN_2 * core::f32::consts::LN_2;
     (num_items as f32 * ((1.0/false_pos_rate).ln() / ln22)).round() as usize
 }

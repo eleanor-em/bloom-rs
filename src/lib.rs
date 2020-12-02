@@ -113,9 +113,6 @@ mod hashing;
 pub mod bloom;
 pub use bloom::{BloomFilter,optimal_num_hashes,needed_bits};
 
-pub mod counting;
-pub use counting::CountingBloomFilter;
-
 pub mod valuevec;
 pub use valuevec::ValueVec;
 

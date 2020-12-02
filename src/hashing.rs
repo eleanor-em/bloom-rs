@@ -5,8 +5,8 @@ use std::hash::{BuildHasher,Hash,Hasher};
 pub struct HashIter {
     h1: u64,
     h2: u64,
-    i: u32,
-    count: u32,
+    i: usize,
+    count: usize,
 }
 
 impl Iterator for HashIter {
@@ -30,7 +30,7 @@ impl Iterator for HashIter {
 }
 
 impl HashIter {
-    pub fn from<T: Hash, R: BuildHasher, S: BuildHasher>(item: T, count: u32, build_hasher_one:&R, build_hasher_two:&S) -> HashIter {
+    pub fn from<T: Hash, R: BuildHasher, S: BuildHasher>(item: T, count: usize, build_hasher_one:&R, build_hasher_two:&S) -> HashIter {
         let mut hasher_one = build_hasher_one.build_hasher();
         let mut hasher_two = build_hasher_two.build_hasher();
         item.hash(&mut hasher_one);
